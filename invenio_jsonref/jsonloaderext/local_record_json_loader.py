@@ -22,31 +22,31 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
+"""Resolver for record metadata."""
 
 import urlparse
 
+from functools import partial
+
 from flask import current_app
 
-site_hostname = urlparse.urlsplit(current_app.config['CFG_SITE_URL']).netloc
-site_secure_hostname = urlparse.urlsplit(current_app.config['CFG_SITE_SECURE_URL']).netloc
+from werkzeug.local import LocalProxy
 
-url_map = [
-    ('/record/<id>', site_hostname)
-]
-
-if site_hostname != site_secure_hostname:
-    url_map += ('/record/<id>', site_secure_hostname)
+from invenio_jsonref import remote_json_route
 
 
-class LocalRecordJsonLoader(object):
-    __url_map__ = url_map
-
-    def get_remote_json(self, uri):
-        from invenio_records.api import get_record
-
-        splitted_url = urlparse.urlsplit(uri)
-        recid = int(splitted_url.path.split('/')[2])
-        return get_record(recid).dumps()
+def _netloc(key):
+    """Parse url stored in current application config."""
+    return urlparse.urlsplit(current_app.config[key]).netloc
 
 
-loader = LocalRecordJsonLoader
+HOST = LocalProxy(partial(_netloc, 'CFG_SITE_URL'))
+SECURE_HOST = LocalProxy(partial(_netloc, 'CFG_SITE_SECURE_URL'))
+
+
+@remote_json_route('/record/<recid>', host=HOST)
+@remote_json_route('/record/<recid>', host=SECURE_HOST)
+def loader(recid):
+    """Return record dictionary."""
+    from invenio_records.api import get_record
+    return get_record(recid).dumps()

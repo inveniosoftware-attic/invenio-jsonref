@@ -21,33 +21,34 @@
 # In applying this license, CERN does not
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
-import itertools
-from werkzeug.routing import Rule, Map
 
-from invenio.ext.registry import ModuleAutoDiscoverySubRegistry
-from flask.ext.registry import RegistryProxy
+"""Define package registries."""
+
+import itertools
+
+from flask_registry import RegistryProxy
+
+from invenio_ext.registry import ModuleAutoDiscoverySubRegistry
+
+from werkzeug.routing import Rule, Map
 
 
 class JsonLoaderRegistry(ModuleAutoDiscoverySubRegistry, Map):
+
     """JsonLoader Registry."""
 
     def register(self, item):
-        loader_class = getattr(item, 'loader')
-        assert hasattr(loader_class, '__url_map__')
+        loader = getattr(item, 'loader')
+        assert hasattr(loader, '__remote_json_map__')
 
-        loader_object = loader_class()
+        for kwargs in loader.__remote_json_map__:
+            self.add(
+                Rule(endpoint=loader, **kwargs)
+            )
 
-        paths, hostnames = zip(*loader_class.__url_map__)
-        url_tuples = zip(paths, [loader_object for _ in range(len(paths))], hostnames)
-        url_rules = [Rule(path, endpoint=loader_object, host=host) for path, method, host in url_tuples]
-
-
-        map(self.add, url_rules)
-
-        return super(JsonLoaderRegistry, self).register(url_rules)
+        return super(JsonLoaderRegistry, self).register(loader)
 
 
-json_loaders = RegistryProxy('jsonloaderext',
+json_loaders = RegistryProxy('jsonrefext',
                              JsonLoaderRegistry,
-                             'jsonloaderext')
-
+                             'jsonrefext')

@@ -22,11 +22,14 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Invenio module for resolving json references"""
+"""Invenio module for resolving JSON references."""
 
+from .utils import JsonProxy, remote_json_route
 from .version import __version__
-from .utils import JonsProxy
+
+
 __all__ = (
     '__version__',
-    'JsonProxy'
+    'JsonProxy',
+    'remote_json_route',
 )

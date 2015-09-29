@@ -22,16 +22,30 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
+"""Define utility functions."""
+
 import urlparse
-from collections import Sequence
-from collections import Mapping
-from werkzeug.exceptions import NotFound
+
+from collections import Sequence, Mapping
+
 from jsonref import JsonLoader, JsonRef
+
+from werkzeug.exceptions import NotFound
 
 from .registry import json_loaders
 
 
-class JsonProxy(JsonLoader):
+def remote_json_route(string, host=None):
+    """Register rule on decorated function."""
+    def decorator(f):
+        if not hasattr(f, '__remote_json_map__'):
+            f.__remote_json_map__ = []
+        f.__remote_json_map__.append(dict(string=string, host=host))
+        return f
+    return decorator
+
+
+class JsonProxy(JsonLoader, object):
 
     def __init__(self, *args, **kwargs):
         super(JsonProxy, self).__init__(*args, **kwargs)
@@ -40,8 +54,8 @@ class JsonProxy(JsonLoader):
         splitted_url = urlparse.urlsplit(uri)
         try:
             json_loader, args = json_loaders.bind(splitted_url.hostname).match(splitted_url.path)
-            return json_loader.get_remote_json(uri)
-        except NotFound, e:
+            return json_loader(**args)
+        except NotFound:
             return super(JsonProxy, self).get_remote_json(uri, **kwargs)
 
     def create_references(self, data_structure):

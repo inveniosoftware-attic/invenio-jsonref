@@ -22,7 +22,7 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Invenio module for resolving json references"""
+"""Invenio module for resolving JSON references"""
 
 import os
 import sys
@@ -34,17 +34,18 @@ readme = open('README.rst').read()
 history = open('CHANGES.rst').read()
 
 requirements = [
-    'Flask>=0.10.1',
+    'Flask-Registry>=0.2.0',
     'six>=1.7.2',
-    'Invenio>=2.0.3',
-    'jsonref>=0.1'
+    'invenio-ext>=0.2.1',
+    'jsonref>=0.1',
 ]
 
 test_requirements = [
-    'pytest>=2.7.0',
-    'pytest-cov>=1.8.0',
+    'coverage>=4.0.0',
+    'invenio-testing>=0.1.1',
+    'pytest-cov>=2.1.0',
     'pytest-pep8>=1.0.6',
-    'coverage>=3.7.1',
+    'pytest>=2.8.0',
 ]
 
 
@@ -77,7 +78,7 @@ class PyTest(TestCommand):
         import pytest
         import _pytest.config
         pm = _pytest.config.get_plugin_manager()
-        pm.consider_setuptools_entrypoints()
+        pm.load_setuptools_entrypoints()
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
