@@ -26,4 +26,4 @@ Authors
 
 Invenio module for resolving json references
 
-- CERN <info@invenio-software.org>
+- CERN <info@inveniosoftware.org>
