@@ -43,6 +43,7 @@ requirements = [
 test_requirements = [
     'coverage>=4.0.0',
     'invenio-testing>=0.1.1',
+    'pydocstyle>=1.0.0',
     'pytest-cov>=2.1.0',
     'pytest-pep8>=1.0.6',
     'pytest>=2.8.0',
