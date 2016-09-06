@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
@@ -22,33 +23,10 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Define package registries."""
 
-import itertools
-
-from werkzeug.routing import Map, Rule
-
-from flask_registry import RegistryProxy
-
-from invenio_ext.registry import ModuleAutoDiscoverySubRegistry
-
-
-class JsonLoaderRegistry(ModuleAutoDiscoverySubRegistry, Map):
-
-    """JsonLoader Registry."""
-
-    def register(self, item):
-        loader = getattr(item, 'loader')
-        assert hasattr(loader, '__remote_json_map__')
-
-        for kwargs in loader.__remote_json_map__:
-            self.add(
-                Rule(endpoint=loader, **kwargs)
-            )
-
-        return super(JsonLoaderRegistry, self).register(loader)
-
-
-json_loaders = RegistryProxy('jsonrefext',
-                             JsonLoaderRegistry,
-                             'jsonrefext')
+pydocstyle invenio_jsonsref && \
+isort -rc -c -df **/*.py && \
+check-manifest --ignore ".travis-*" && \
+sphinx-build -qnNW docs docs/_build/html && \
+python setup.py test && \
+sphinx-build -qnNW -b doctest docs docs/_build/doctest
